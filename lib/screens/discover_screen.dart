@@ -78,6 +78,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) super.setState(fn);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Discover')),

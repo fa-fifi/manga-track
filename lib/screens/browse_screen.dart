@@ -49,6 +49,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) super.setState(fn);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Browse')),
