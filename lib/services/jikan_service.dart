@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:mangatrack/models/genre.dart';
 
 /// Thin wrapper around the Jikan v4 API.
 /// Methods return the full decoded JSON response map.
@@ -10,9 +11,20 @@ class JikanService {
 
   /// GET /genres/manga
   /// Returns the full decoded response map, e.g. `{ "data": [...] }`.
-  static Future<Map<String, dynamic>> fetchGenres() async {
+  static Future<List<Genre>> fetchGenres() async {
     final response = await http.get(Uri.parse('$_baseUrl/genres/manga'));
-    return jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200) {
+      final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = (responseBody['data'] as List<dynamic>?) ?? [];
+      final genres = data
+          .map((json) => Genre.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      return genres;
+    } else {
+      throw Exception('Failed to fetch manga genres.');
+    }
   }
 
   /// GET /manga with optional filters.

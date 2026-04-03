@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mangatrack/models/genre.dart';
 
 import '../services/jikan_service.dart';
 
@@ -20,18 +21,18 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
   // TODO: replace with live genres from API once they're loaded
 
-  static const List<Map<String, dynamic>> _kSampleGenres = [
-    {'mal_id': 1, 'name': 'Action'},
-    {'mal_id': 2, 'name': 'Adventure'},
-    {'mal_id': 4, 'name': 'Comedy'},
-    {'mal_id': 8, 'name': 'Drama'},
-    {'mal_id': 10, 'name': 'Fantasy'},
-    {'mal_id': 14, 'name': 'Horror'},
-    {'mal_id': 22, 'name': 'Romance'},
-    {'mal_id': 36, 'name': 'Slice of Life'},
+  static const _kSampleGenres = <Genre>[
+    Genre(id: 1, name: 'Action'),
+    Genre(id: 2, name: 'Adventure'),
+    Genre(id: 4, name: 'Comedy'),
+    Genre(id: 8, name: 'Drama'),
+    Genre(id: 10, name: 'Fantasy'),
+    Genre(id: 14, name: 'Horror'),
+    Genre(id: 22, name: 'Romance'),
+    Genre(id: 36, name: 'Slice of Life'),
   ];
 
-  List<dynamic> genres = []; // populated from /manga/genres on init
+  var genres = <Genre>[]; // populated from /manga/genres on init
   List<dynamic> mangaList = []; // populated from /manga on init
   bool isLoading = false;
   String searchQuery = '';
@@ -50,7 +51,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
     // 1. Fetch genres
     final genreData = await JikanService.fetchGenres();
-    setState(() => genres = (genreData['data'] as List<dynamic>?) ?? []);
+    setState(() => genres = genreData);
     debugPrint('[Discover] Genres loaded: ${genres.length}');
 
     // 2. Fetch first page of manga
@@ -126,19 +127,18 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                       onSelected: (_) => _onGenreChanged(null),
                     ),
                   ),
-                  ...(genres.isNotEmpty ? genres : _kSampleGenres).map((g) {
-                    final id = g['mal_id'] as int;
-                    final name = g['name'] as String;
-                    return Padding(
+                  ...(genres.isNotEmpty ? genres : _kSampleGenres).map(
+                    (genre) => Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: FilterChip(
-                        label: Text(name),
-                        selected: selectedGenreId == id,
-                        onSelected: (_) =>
-                            _onGenreChanged(selectedGenreId == id ? null : id),
+                        label: Text(genre.name),
+                        selected: selectedGenreId == genre.id,
+                        onSelected: (_) => _onGenreChanged(
+                          selectedGenreId == genre.id ? null : genre.id,
+                        ),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 ],
               ),
             ),
