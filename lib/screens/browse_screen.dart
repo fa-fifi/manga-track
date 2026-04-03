@@ -9,7 +9,8 @@ class BrowseScreen extends StatefulWidget {
   State<BrowseScreen> createState() => _BrowseScreenState();
 }
 
-class _BrowseScreenState extends State<BrowseScreen> {
+class _BrowseScreenState extends State<BrowseScreen>
+    with AutomaticKeepAliveClientMixin {
   List<dynamic> genres = [];
   List<dynamic> mangaList = [];
   Map<String, List<dynamic>> groupedByGenre = {};
@@ -54,7 +55,12 @@ class _BrowseScreenState extends State<BrowseScreen> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Browse')),
       body: const Center(

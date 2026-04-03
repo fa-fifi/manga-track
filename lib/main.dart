@@ -59,6 +59,7 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
+  late final _pageController = PageController(initialPage: _currentIndex);
   int _currentIndex = 0;
 
   static const List<Widget> _screens = [
@@ -70,10 +71,17 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: PageView(
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) => setState(() {
+          _currentIndex = index;
+          _pageController.jumpToPage(index);
+        }),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),

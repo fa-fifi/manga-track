@@ -12,7 +12,8 @@ class DiscoverScreen extends StatefulWidget {
   State<DiscoverScreen> createState() => _DiscoverScreenState();
 }
 
-class _DiscoverScreenState extends State<DiscoverScreen> {
+class _DiscoverScreenState extends State<DiscoverScreen>
+    with AutomaticKeepAliveClientMixin {
   // -------------------------------------------------------------------------
   // Hardcoded sample genres
   // -------------------------------------------------------------------------
@@ -83,7 +84,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Discover')),
       body: Padding(

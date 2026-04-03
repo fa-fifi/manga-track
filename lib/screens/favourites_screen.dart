@@ -7,7 +7,8 @@ class FavouritesScreen extends StatefulWidget {
   State<FavouritesScreen> createState() => _FavouritesScreenState();
 }
 
-class _FavouritesScreenState extends State<FavouritesScreen> {
+class _FavouritesScreenState extends State<FavouritesScreen>
+    with AutomaticKeepAliveClientMixin {
   // -------------------------------------------------------------------------
   // State
   // -------------------------------------------------------------------------
@@ -19,7 +20,12 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   // -------------------------------------------------------------------------
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Favourites')),
       body: const Center(
