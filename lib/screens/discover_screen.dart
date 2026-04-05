@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mangatrack/models/genre.dart';
+import 'package:mangatrack/models/manga.dart';
 
 import '../services/jikan_service.dart';
 
@@ -33,8 +33,8 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   ];
 
   var genres = <Genre>[]; // populated from /manga/genres on init
-  List<dynamic> mangaList = []; // populated from /manga on init
-  bool isLoading = false;
+  var mangaList = <Manga>[]; // populated from /manga on init
+  var isLoading = false;
   int? selectedGenreId;
   int currentPage = 1;
   bool hasReachedEnd = false;
@@ -49,34 +49,24 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     setState(() => isLoading = true);
 
     // 1. Fetch genres
-    final genreData = await JikanService.fetchGenres();
-    setState(() => genres = genreData);
+    genres = await JikanService.fetchGenres();
     debugPrint('[Discover] Genres loaded: ${genres.length}');
 
     // 2. Fetch first page of manga
-    final mangaData = await JikanService.fetchManga(page: 1, limit: 20);
-    setState(() {
-      mangaList = (mangaData['data'] as List<dynamic>?) ?? [];
-      isLoading = false;
-    });
+    mangaList = await JikanService.fetchManga(page: 1, limit: 20);
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
+
+    setState(() => isLoading = false);
   }
 
   void _onSearchChanged(String query) async {
     // TODO: trigger a new fetch with the updated search query
     setState(() => isLoading = true);
 
-    final mangaData = await JikanService.fetchManga(
-      query: query,
-      page: 1,
-      limit: 20,
-    );
-
-    setState(() {
-      mangaList = (mangaData['data'] as List<dynamic>?) ?? [];
-      isLoading = false;
-    });
+    mangaList = await JikanService.fetchManga(query: query, page: 1, limit: 20);
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
+
+    setState(() => isLoading = false);
   }
 
   void _onGenreChanged(int? genreId) {
@@ -157,33 +147,55 @@ class _DiscoverScreenState extends State<DiscoverScreen>
             const SizedBox(height: 8),
 
             // TODO: render manga list
-            Expanded(
-              child: Center(
+            if (mangaList.isNotEmpty)
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 1 / 2,
+                  ),
+                  itemCount: mangaList.length,
+                  itemBuilder: (context, index) {
+                    final manga = mangaList[index];
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(manga.thumbnail),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          manga.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              )
+            else
+              Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Manga list will appear here'),
+                    Icon(Icons.auto_stories_outlined, size: 48),
                     const SizedBox(height: 16),
-
-                    // Stub: remove once list is implemented
-                    GestureDetector(
-                      onTap: () => context.go(
-                        '/viewer',
-                        extra:
-                            'assets/images/placeholder.jpg', // Continue uses the tall placeholder image for actual implementation for full image page
-                      ),
-                      child: const Text(
-                        'Tap to test image viewer →',
-                        style: TextStyle(
-                          color: Colors.indigo,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
+                    const Text('No manga found.'),
                   ],
                 ),
               ),
-            ),
           ],
         ),
       ),

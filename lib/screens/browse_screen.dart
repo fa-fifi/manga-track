@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangatrack/models/genre.dart';
+import 'package:mangatrack/models/manga.dart';
 
 import '../services/jikan_service.dart';
 
@@ -13,7 +14,7 @@ class BrowseScreen extends StatefulWidget {
 class _BrowseScreenState extends State<BrowseScreen>
     with AutomaticKeepAliveClientMixin {
   var genres = <Genre>[];
-  List<dynamic> mangaList = [];
+  var mangaList = <Manga>[];
   Map<String, List<dynamic>> groupedByGenre = {};
   bool isBrowseLoading = true;
 
@@ -29,11 +30,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     setState(() => genres = genreResponse);
 
     // 2. Fetch manga pages
-    List<dynamic> allManga = [];
-
-    final res = await JikanService.fetchManga(page: 1, limit: 100);
-    final pageData = (res['data'] as List<dynamic>?) ?? [];
-    allManga.addAll(pageData);
+    final allManga = await JikanService.fetchManga(page: 1, limit: 100);
 
     // TODO: filter genres to only those with manga, and fetch more pages if needed to get a good sample of manga for each genre
 
