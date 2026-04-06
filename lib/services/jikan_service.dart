@@ -49,7 +49,7 @@ class JikanService {
   /// Returns the full decoded response map, e.g. `{ "data": [...], "pagination": {...} }`.
   ///
   /// https://docs.api.jikan.moe/#/manga/getmangasearch
-  static Future<List<Manga>> getMangaSearch({
+  static Future<(List<Manga>, bool)> getMangaSearch({
     String? query,
     int? genreId,
     int page = 1,
@@ -74,8 +74,10 @@ class JikanService {
         final mangaList = data
             .map((json) => Manga.fromJson(json as Map<String, dynamic>))
             .toList();
+        final pagination = responseBody['pagination'] as Map<String, dynamic>;
+        final hasNextPage = pagination['has_next_page'] as bool;
 
-        return mangaList;
+        return (mangaList, hasNextPage);
       } else {
         final errorMessage = responseBody['message'] as String;
 
@@ -83,7 +85,7 @@ class JikanService {
       }
     } catch (e, s) {
       log('Failed to fetch manga list.', error: e, stackTrace: s);
-      return [];
+      return (<Manga>[], false);
     }
   }
 }

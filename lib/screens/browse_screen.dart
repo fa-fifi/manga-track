@@ -37,7 +37,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     // TODO: Group by  genre
 
     setState(() {
-      mangaList = allManga;
+      mangaList = allManga.$1;
       groupedByGenre = {};
       isBrowseLoading = false;
     });
