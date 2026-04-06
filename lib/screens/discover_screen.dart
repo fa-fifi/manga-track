@@ -35,6 +35,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   var genres = <Genre>[]; // populated from /manga/genres on init
   var mangaList = <Manga>[]; // populated from /manga on init
   var isLoading = false;
+  var searchQuery = '';
   int? selectedGenreId;
   int currentPage = 1;
   bool hasReachedEnd = false;
@@ -53,7 +54,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     debugPrint('[Discover] Genres loaded: ${genres.length}');
 
     // 2. Fetch first page of manga
-    mangaList = await JikanService.fetchManga(page: 1, limit: 20);
+    mangaList = await JikanService.fetchManga(limit: 20);
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
 
     setState(() => isLoading = false);
@@ -63,21 +64,30 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     // TODO: trigger a new fetch with the updated search query
     setState(() => isLoading = true);
 
-    mangaList = await JikanService.fetchManga(query: query, page: 1, limit: 20);
+    searchQuery = query;
+    mangaList = await JikanService.fetchManga(query: searchQuery, limit: 20);
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
 
     setState(() => isLoading = false);
   }
 
-  void _onGenreChanged(int? genreId) {
+  void _onGenreChanged(int? genreId) async {
     // TODO: make changes accordingly
+    selectedGenreId = genreId;
     _fetchFilteredWithGenre(selectedGenreId);
-    setState(() => selectedGenreId = genreId);
   }
 
   Future<void> _fetchFilteredWithGenre(int? genreId) async {
     setState(() => isLoading = true);
+
     // TODO: trigger a fetch with the genreId
+    mangaList = await JikanService.fetchManga(
+      query: searchQuery,
+      genreId: selectedGenreId,
+      limit: 20,
+    );
+
+    setState(() => isLoading = false);
   }
 
   @override
