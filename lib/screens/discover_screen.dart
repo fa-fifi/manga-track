@@ -20,7 +20,6 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   // -------------------------------------------------------------------------
 
   // TODO: replace with live genres from API once they're loaded
-
   static const _kSampleGenres = <Genre>[
     Genre(id: 1, name: 'Action'),
     Genre(id: 2, name: 'Adventure'),
@@ -32,6 +31,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     Genre(id: 36, name: 'Slice of Life'),
   ];
   final searchController = TextEditingController();
+  final minLimit = 20; // min no. of manga loaded per search
   var genres = <Genre>[]; // populated from /manga/genres on init
   var mangaList = <Manga>[]; // populated from /manga on init
   var isLoading = false;
@@ -53,7 +53,22 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     debugPrint('[Discover] Genres loaded: ${genres.length}');
 
     // 2. Fetch first page of manga
-    mangaList = await JikanService.getMangaSearch(limit: 20);
+    mangaList = await JikanService.getMangaSearch(limit: minLimit);
+    debugPrint('[Discover] Manga loaded: ${mangaList.length}');
+
+    setState(() => isLoading = false);
+  }
+
+  Future<void> _loadManga() async {
+    setState(() => isLoading = true);
+
+    final result = await JikanService.getMangaSearch(
+      query: searchController.text,
+      genreId: selectedGenreId,
+      page: currentPage,
+      limit: minLimit,
+    );
+    currentPage > 1 ? mangaList.addAll(result) : mangaList = result;
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
 
     setState(() => isLoading = false);
@@ -61,22 +76,20 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
   void _onSearchChanged() async {
     // TODO: trigger a new fetch with the updated search query
-    setState(() => isLoading = true);
-
-    mangaList = await JikanService.getMangaSearch(
-      query: searchController.text,
-      genreId: selectedGenreId,
-      limit: 20,
-    );
-    debugPrint('[Discover] Manga loaded: ${mangaList.length}');
-
-    setState(() => isLoading = false);
+    currentPage = 1;
+    _loadManga();
   }
 
   void _onGenreChanged(int? genreId) async {
     // TODO: make changes accordingly
     selectedGenreId = genreId;
-    _onSearchChanged();
+    currentPage = 1;
+    _loadManga();
+  }
+
+  void _loadMoreManga() async {
+    currentPage = currentPage + 1;
+    _loadManga();
   }
 
   @override
@@ -156,31 +169,40 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                     mainAxisSpacing: 10,
                     childAspectRatio: 1 / 2,
                   ),
-                  itemCount: mangaList.length,
+                  itemCount: mangaList.length + 1,
                   itemBuilder: (context, index) {
-                    final manga = mangaList[index];
+                    if (index < mangaList.length) {
+                      final manga = mangaList[index];
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(manga.thumbnail),
-                                fit: BoxFit.cover,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(manga.thumbnail),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Text(
-                          manga.title,
-                          style: Theme.of(context).textTheme.titleMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    );
+                          Text(
+                            manga.title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      );
+                    } else {
+                      // extra item will request next page & rebuild widget
+                      if (isLoading == false) {
+                        Future.delayed(Duration.zero, () => _loadMoreManga());
+                      }
+
+                      return Center(child: CircularProgressIndicator());
+                    }
                   },
                 ),
               )
