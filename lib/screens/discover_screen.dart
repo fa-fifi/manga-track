@@ -31,11 +31,10 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     Genre(id: 22, name: 'Romance'),
     Genre(id: 36, name: 'Slice of Life'),
   ];
-
+  final searchController = TextEditingController();
   var genres = <Genre>[]; // populated from /manga/genres on init
   var mangaList = <Manga>[]; // populated from /manga on init
   var isLoading = false;
-  var searchQuery = '';
   int? selectedGenreId;
   int currentPage = 1;
   bool hasReachedEnd = false;
@@ -60,13 +59,13 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     setState(() => isLoading = false);
   }
 
-  void _onSearchChanged(String query) async {
+  void _onSearchChanged() async {
     // TODO: trigger a new fetch with the updated search query
     setState(() => isLoading = true);
 
-    searchQuery = query;
     mangaList = await JikanService.getMangaSearch(
-      query: searchQuery,
+      query: searchController.text,
+      genreId: selectedGenreId,
       limit: 20,
     );
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
@@ -77,20 +76,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   void _onGenreChanged(int? genreId) async {
     // TODO: make changes accordingly
     selectedGenreId = genreId;
-    _fetchFilteredWithGenre(selectedGenreId);
-  }
-
-  Future<void> _fetchFilteredWithGenre(int? genreId) async {
-    setState(() => isLoading = true);
-
-    // TODO: trigger a fetch with the genreId
-    mangaList = await JikanService.getMangaSearch(
-      query: searchQuery,
-      genreId: selectedGenreId,
-      limit: 20,
-    );
-
-    setState(() => isLoading = false);
+    _onSearchChanged();
   }
 
   @override
@@ -116,12 +102,13 @@ class _DiscoverScreenState extends State<DiscoverScreen>
 
             // Search field
             TextField(
+              controller: searchController,
               decoration: const InputDecoration(
                 labelText: 'Search manga...',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(),
               ),
-              onChanged: _onSearchChanged,
+              onChanged: (_) => _onSearchChanged(),
             ),
 
             const SizedBox(height: 8),
