@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mangatrack/models/genre.dart';
 import 'package:mangatrack/models/manga.dart';
+import 'package:mangatrack/widgets/manga_card.dart';
 
 import '../services/jikan_service.dart';
 
@@ -183,29 +184,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                           ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         if (index < mangaList.length) {
-                          final manga = mangaList[index];
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage(manga.thumbnail),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                manga.title,
-                                style: Theme.of(context).textTheme.titleMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          );
+                          return MangaCard(mangaList[index]);
                         } else if (!hasReachedEnd) {
                           // extra item will request next page & rebuild widget
                           if (isLoading == false) {
