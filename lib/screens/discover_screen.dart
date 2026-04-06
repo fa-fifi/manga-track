@@ -170,7 +170,9 @@ class _DiscoverScreenState extends State<DiscoverScreen>
             const SizedBox(height: 8),
 
             // TODO: render manga list
-            if (mangaList.isNotEmpty)
+            if (isLoading && currentPage == 1)
+              Expanded(child: Center(child: CircularProgressIndicator()))
+            else if (mangaList.isNotEmpty)
               Expanded(
                 child: CustomScrollView(
                   slivers: [
