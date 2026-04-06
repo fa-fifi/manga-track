@@ -13,7 +13,7 @@ class MangaCard extends StatelessWidget {
     children: [
       Expanded(
         child: InkWell(
-          onTap: () => context.go(
+          onTap: () => context.push(
             '/viewer',
             extra:
                 'assets/images/placeholder.jpg', // Continue uses the tall placeholder image for actual implementation for full image page
