@@ -26,11 +26,11 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   Future<void> _fetchBrowseData() async {
     // 1. Fetch genres
-    final genreResponse = await JikanService.fetchGenres();
+    final genreResponse = await JikanService.getMangaGenres();
     setState(() => genres = genreResponse);
 
     // 2. Fetch manga pages
-    final allManga = await JikanService.fetchManga(page: 1, limit: 100);
+    final allManga = await JikanService.getMangaSearch(page: 1, limit: 100);
 
     // TODO: filter genres to only those with manga, and fetch more pages if needed to get a good sample of manga for each genre
 

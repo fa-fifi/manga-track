@@ -50,11 +50,11 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     setState(() => isLoading = true);
 
     // 1. Fetch genres
-    genres = await JikanService.fetchGenres();
+    genres = await JikanService.getMangaGenres();
     debugPrint('[Discover] Genres loaded: ${genres.length}');
 
     // 2. Fetch first page of manga
-    mangaList = await JikanService.fetchManga(limit: 20);
+    mangaList = await JikanService.getMangaSearch(limit: 20);
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
 
     setState(() => isLoading = false);
@@ -65,7 +65,10 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     setState(() => isLoading = true);
 
     searchQuery = query;
-    mangaList = await JikanService.fetchManga(query: searchQuery, limit: 20);
+    mangaList = await JikanService.getMangaSearch(
+      query: searchQuery,
+      limit: 20,
+    );
     debugPrint('[Discover] Manga loaded: ${mangaList.length}');
 
     setState(() => isLoading = false);
@@ -81,7 +84,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
     setState(() => isLoading = true);
 
     // TODO: trigger a fetch with the genreId
-    mangaList = await JikanService.fetchManga(
+    mangaList = await JikanService.getMangaSearch(
       query: searchQuery,
       genreId: selectedGenreId,
       limit: 20,

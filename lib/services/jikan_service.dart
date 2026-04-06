@@ -14,7 +14,9 @@ class JikanService {
 
   /// GET /genres/manga
   /// Returns the full decoded response map, e.g. `{ "data": [...] }`.
-  static Future<List<Genre>> fetchGenres() async {
+  ///
+  /// https://docs.api.jikan.moe/#/genres/getmangagenres
+  static Future<List<Genre>> getMangaGenres() async {
     try {
       final response = await http.get(Uri.parse('$_baseUrl/genres/manga'));
       final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
@@ -45,7 +47,9 @@ class JikanService {
   /// [limit]   — results per page (default 25)
   ///
   /// Returns the full decoded response map, e.g. `{ "data": [...], "pagination": {...} }`.
-  static Future<List<Manga>> fetchManga({
+  ///
+  /// https://docs.api.jikan.moe/#/manga/getmangasearch
+  static Future<List<Manga>> getMangaSearch({
     String? query,
     int? genreId,
     int page = 1,
