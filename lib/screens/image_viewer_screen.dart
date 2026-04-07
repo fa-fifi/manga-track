@@ -25,7 +25,7 @@ class ImageViewerScreen extends StatelessWidget {
             child: IconButton.filled(
               onPressed: () => context.pop(),
               icon: Icon(Icons.close),
-              style: FilledButton.styleFrom(
+              style: IconButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.black26,
               ),

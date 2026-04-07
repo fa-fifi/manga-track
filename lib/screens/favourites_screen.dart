@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mangatrack/models/favourites.dart';
+import 'package:mangatrack/widgets/manga_card.dart';
+import 'package:provider/provider.dart';
 
 class FavouritesScreen extends StatefulWidget {
   const FavouritesScreen({super.key});
@@ -28,9 +31,36 @@ class _FavouritesScreenState extends State<FavouritesScreen>
 
     return Scaffold(
       appBar: AppBar(title: const Text('Favourites')),
-      body: const Center(
-        // TODO: replace with actual favourites list
-        child: Text('Your favourite manga will be shown here.'),
+      body: Consumer<Favourites>(
+        builder: (context, favourites, child) {
+          if (favourites.mangaList.isEmpty) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Icon(Icons.favorite_border_outlined, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  'No favourites yet — start exploring!',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            );
+          } else {
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1 / 2,
+              ),
+              itemCount: favourites.mangaList.length,
+              itemBuilder: (context, index) =>
+                  MangaCard(favourites.mangaList[index]),
+            );
+          }
+        },
       ),
     );
   }
