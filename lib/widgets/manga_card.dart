@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mangatrack/models/favourites.dart';
+import 'package:mangatrack/models/library.dart';
 import 'package:mangatrack/models/manga.dart';
 import 'package:provider/provider.dart';
 
@@ -32,11 +32,12 @@ class MangaCard extends StatelessWidget {
                 ),
               ),
               IconButton.filled(
-                onPressed: () => context.read<Favourites>().toggleManga(manga),
+                onPressed: () =>
+                    context.read<Library>().toggleFavouriteManga(manga),
                 icon: Icon(Icons.favorite),
                 style: IconButton.styleFrom(
                   foregroundColor:
-                      context.watch<Favourites>().mangaList.contains(manga)
+                      context.watch<Library>().favouriteManga.contains(manga)
                       ? Colors.pink
                       : Colors.white54,
                   backgroundColor: Colors.black26,

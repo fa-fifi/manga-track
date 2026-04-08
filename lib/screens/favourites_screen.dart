@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangatrack/models/favourites.dart';
+import 'package:mangatrack/models/library.dart';
 import 'package:mangatrack/widgets/manga_card.dart';
 import 'package:provider/provider.dart';
 
@@ -31,9 +31,9 @@ class _FavouritesScreenState extends State<FavouritesScreen>
 
     return Scaffold(
       appBar: AppBar(title: const Text('Favourites')),
-      body: Consumer<Favourites>(
-        builder: (context, favourites, child) {
-          if (favourites.mangaList.isEmpty) {
+      body: Consumer<Library>(
+        builder: (context, library, child) {
+          if (library.favouriteManga.isEmpty) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,9 +55,9 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                 mainAxisSpacing: 10,
                 childAspectRatio: 1 / 2,
               ),
-              itemCount: favourites.mangaList.length,
+              itemCount: library.favouriteManga.length,
               itemBuilder: (context, index) =>
-                  MangaCard(favourites.mangaList[index]),
+                  MangaCard(library.favouriteManga[index]),
             );
           }
         },

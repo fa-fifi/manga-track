@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mangatrack/models/favourites.dart';
+import 'package:mangatrack/models/library.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/browse_screen.dart';
@@ -38,9 +38,7 @@ class MangaTrackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<Favourites>(create: (_) => Favourites()),
-      ],
+      providers: [ChangeNotifierProvider<Library>(create: (_) => Library())],
       child: MaterialApp.router(
         title: 'MangaTrack',
         debugShowCheckedModeBanner: false,
