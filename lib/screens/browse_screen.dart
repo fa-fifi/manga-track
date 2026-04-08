@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mangatrack/models/genre.dart';
 import 'package:mangatrack/models/manga.dart';
@@ -16,7 +18,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   var genres = <Genre>[];
   var mangaList = <Manga>[];
   Map<String, List<dynamic>> groupedByGenre = {};
-  bool isBrowseLoading = true;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -26,23 +28,34 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   Future<void> _fetchBrowseData() async {
     // 1. Fetch genres
-    final genreResponse = await JikanService.getMangaGenres();
-    setState(() => genres = genreResponse);
+    genres = await JikanService.getMangaGenres();
+    debugPrint('[Browse] Genres loaded: ${genres.length}');
 
     // 2. Fetch manga pages
-    final allManga = await JikanService.getMangaSearch(page: 1, limit: 100);
+    Timer.periodic(Duration(milliseconds: 500), (timer) async {
+      if (timer.tick < 5) {
+        final searchResult = await JikanService.getMangaSearch(
+          page: timer.tick,
+        );
+        debugPrint("Function executed at tick: ${timer.tick}");
 
-    // TODO: filter genres to only those with manga, and fetch more pages if needed to get a good sample of manga for each genre
+        mangaList.addAll(searchResult.$1);
 
-    // TODO: Group by  genre
+        // Stop the interval after 4 executions
+        if (timer.tick == 4) timer.cancel();
 
-    setState(() {
-      mangaList = allManga.$1;
-      groupedByGenre = {};
-      isBrowseLoading = false;
+        if (mangaList.length >= 100) {
+          debugPrint('[Browse] Manga loaded: ${mangaList.length}');
+
+          // TODO: filter genres to only those with manga, and fetch more pages if needed to get a good sample of manga for each genre
+
+          // TODO: Group by  genre
+          groupedByGenre = {};
+
+          setState(() => isLoading = false);
+        }
+      }
     });
-
-    debugPrint('[Browse] Manga loaded: ${mangaList.length}');
   }
 
   @override

@@ -29,7 +29,7 @@ class JikanService {
 
         return genres;
       } else {
-        final errorMessage = responseBody['message'] as String;
+        final errorMessage = responseBody['message'] as String?;
 
         throw HttpException('${response.statusCode}: $errorMessage');
       }
@@ -55,6 +55,8 @@ class JikanService {
     int page = 1,
     int limit = 25,
   }) async {
+    assert(limit <= 25, 'The API rate limit is 25 entries per request.');
+
     final params = <String, String>{
       'page': page.toString(),
       'limit': limit.toString(),
@@ -79,7 +81,7 @@ class JikanService {
 
         return (mangaList, hasNextPage);
       } else {
-        final errorMessage = responseBody['message'] as String;
+        final errorMessage = responseBody['message'] as String?;
 
         throw HttpException('${response.statusCode}: $errorMessage');
       }
