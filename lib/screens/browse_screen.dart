@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:mangatrack/models/genre.dart';
 import 'package:mangatrack/models/manga.dart';
 import 'package:mangatrack/widgets/manga_card.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../services/jikan_service.dart';
 
@@ -16,6 +18,12 @@ class BrowseScreen extends StatefulWidget {
 
 class _BrowseScreenState extends State<BrowseScreen>
     with AutomaticKeepAliveClientMixin {
+  final rightPanelScrollController = ItemScrollController();
+  final leftPanelScrollController = ItemScrollController();
+  final rightPanelPositionsListener = ItemPositionsListener.create();
+  final leftPanelPositionsListener = ItemPositionsListener.create();
+  var rightPanelVisibleIndices = <int>[];
+  var leftPanelVisibleIndices = <int>[];
   var genres = <Genre>[];
   var mangaList = <Manga>[];
   Map<Genre, List<Manga>> groupedByGenre = {};
@@ -25,6 +33,34 @@ class _BrowseScreenState extends State<BrowseScreen>
   void initState() {
     super.initState();
     _fetchBrowseData();
+    rightPanelPositionsListener.itemPositions.addListener(() {
+      rightPanelVisibleIndices = rightPanelPositionsListener.itemPositions.value
+          .where(
+            (position) =>
+                position.itemTrailingEdge > 0 && position.itemLeadingEdge < 1,
+          )
+          .map((position) => position.index)
+          .toList();
+      rightPanelVisibleIndices.sort((a, b) => a.compareTo(b));
+      if (rightPanelVisibleIndices.first != leftPanelVisibleIndices.first) {
+        leftPanelScrollController.scrollTo(
+          index: rightPanelVisibleIndices.first,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+      log("Visible indices for right panel: $rightPanelVisibleIndices");
+    });
+    leftPanelPositionsListener.itemPositions.addListener(() {
+      leftPanelVisibleIndices = leftPanelPositionsListener.itemPositions.value
+          .where(
+            (position) =>
+                position.itemTrailingEdge > 0 && position.itemLeadingEdge < 1,
+          )
+          .map((position) => position.index)
+          .toList();
+      log("Visible indices for left panel: $leftPanelVisibleIndices");
+    });
   }
 
   Future<void> _fetchBrowseData() async {
@@ -52,11 +88,15 @@ class _BrowseScreenState extends State<BrowseScreen>
           for (final genre in genres) {
             // TODO: Group by  genre
             for (final manga in mangaList) {
-              groupedByGenre.update(
-                genre,
-                (value) => [...value, manga],
-                ifAbsent: () => [manga],
-              );
+              if (manga.genres
+                  .map((genre) => genre.name)
+                  .contains(genre.name)) {
+                groupedByGenre.update(
+                  genre,
+                  (value) => [...value, manga],
+                  ifAbsent: () => [manga],
+                );
+              }
             }
           }
 
@@ -89,18 +129,30 @@ class _BrowseScreenState extends State<BrowseScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Expanded(
-                    child: ListView.builder(
+                    child: ScrollablePositionedList.builder(
+                      itemScrollController: leftPanelScrollController,
+                      itemPositionsListener: leftPanelPositionsListener,
                       itemCount: groupedByGenre.length,
                       itemBuilder: (context, index) {
                         final genre = groupedByGenre.keys.elementAt(index);
 
-                        return Text(genre.name);
+                        return TextButton(
+                          onPressed: () => rightPanelScrollController.scrollTo(
+                            index: index,
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          ),
+                          child: Text(genre.name),
+                        );
                       },
                     ),
                   ),
+                  SizedBox(width: 10),
                   Expanded(
                     flex: 2,
-                    child: ListView.builder(
+                    child: ScrollablePositionedList.builder(
+                      itemScrollController: rightPanelScrollController,
+                      itemPositionsListener: rightPanelPositionsListener,
                       itemCount: groupedByGenre.length,
                       itemBuilder: (context, index) {
                         final genre = groupedByGenre.keys.elementAt(index);
